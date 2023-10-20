@@ -1,0 +1,35 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Simple</title>
+  </head>
+  <body>
+    <div id="content">Empty</div>
+    <script>
+      WebAssembly.instantiateStreaming(fetch('target/main.wasm'), {
+        spectest: {
+          print_i32: (x) => console.log(String(x)),
+          print_f64: (x) => console.log(String(x)),
+          print_char: (x) => console.log(String.fromCharCode(x)),
+        },
+      }).then((obj) => {
+        obj.instance.exports._start()
+        const str_fn = obj.instance.exports['simple/main::test_str']
+        const int_fn = obj.instance.exports['simple/main::test_int']
+        const int64_fn = obj.instance.exports['simple/main::test_int64']
+        const float_fn = obj.instance.exports['simple/main::test_float']
+
+        // wasm函数只支持数字类型参数
+        // let ret = str_fn('今天是个好日子')
+        // console.log(`str_fn returns: ${ret}`)
+        ret = int_fn(111)
+        console.log(`int_fn returns: ${ret}`)
+        ret = int64_fn(888888 + '')
+        console.log(`int64_fn returns (${typeof ret}): ${ret}`)
+        ret = float_fn(1.234)
+        console.log(`float_fnt returns: ${ret}`)
+      })
+    </script>
+  </body>
+</html>

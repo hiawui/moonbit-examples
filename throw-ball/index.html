@@ -1,0 +1,218 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Throw ball</title>
+  </head>
+  <body>
+    <div id="box" style="margin: 0 auto">
+      <svg id="svg">
+        <rect id="svgborder" x="0" y="0" rx="2" stroke="black" fill="none" />
+        <circle id="ball" stroke="black" fill="grey" stroke-width="2" />
+        <path id="dragger" d="" />
+        <rect id="ballshadow" stroke-width="0" fill="#aaa" rx="2" />
+      </svg>
+      <button id="btn-reset">restart</button>
+    </div>
+    <style>
+      #btn-reset {
+        margin-top: 10px;
+        padding: 10px 8px;
+      }
+      #dragger {
+        stroke: black;
+        stroke-width: 1;
+        display: none;
+      }
+    </style>
+    <script>
+      const $ = (s) => document.querySelector(s)
+
+      const viewWidth = 1000
+      const viewHight = 600
+      const ballRadius = 20
+      const ballStartX = ballRadius + 1
+      const ballStartY = viewHight - ballRadius - 1
+      const ballShadowHeight = 3
+      const box = $('#box')
+      const svg = $('#svg')
+      const border = $('#svgborder')
+      const dragger = $('#dragger')
+      const btnReset = $('#btn-reset')
+      const ball = $('#ball')
+      const ballShadow = $('#ballshadow')
+
+      box.style.width = viewWidth + 'px'
+      box.style.height = viewHight + 'px'
+      svg.setAttribute('viewBox', `0 0 ${viewWidth} ${viewHight}`)
+      border.setAttribute('width', viewWidth)
+      border.setAttribute('height', viewHight)
+      ballShadow.setAttribute('x', ballStartX - ballRadius - 1)
+      ballShadow.setAttribute('y', viewHight - ballShadowHeight)
+      ballShadow.setAttribute('width', ballRadius * 2 + 2)
+      ballShadow.setAttribute('height', ballShadowHeight)
+
+      const gameInfo = {
+        g: 0.005,
+        state: 0, // 0-start, 1-draging, 2-flying, 3-end
+        ballInfo: {
+          startX: ballStartX,
+          startY: ballStartY,
+          currX: ballStartX,
+          currY: ballStartY,
+        },
+        dragInfo: {
+          startX: 0,
+          startY: 0,
+          endX: 0,
+          endY: 0,
+        },
+        flyInfo: {
+          startTime: 0,
+        },
+      }
+
+      btnReset.onclick = (e) => {
+        if (gameInfo.state === 0) {
+          return
+        }
+        gameInfo.state = 0
+        const { ballInfo } = gameInfo
+        ballInfo.currX = ballInfo.startX
+        ballInfo.currY = ballInfo.startY
+        console.log('reset')
+        updateSvg()
+      }
+
+      ball.setAttribute('cx', ballStartX)
+      ball.setAttribute('cy', ballStartY)
+      ball.setAttribute('r', ballRadius)
+      ball.onmousedown = (e) => {
+        if (gameInfo.state != 0) {
+          return
+        }
+        gameInfo.state = 1
+        gameInfo.dragInfo = {
+          ...gameInfo.dragInfo,
+          startX: e.clientX,
+          startY: e.clientY,
+          endX: e.clientX,
+          endY: e.clientY,
+        }
+        console.log('draging ball')
+      }
+      document.onmouseup = (e) => {
+        if (gameInfo.state != 1) {
+          return
+        }
+        const { dragInfo } = gameInfo
+        calDraggerEndpoint(
+          dragInfo.startX,
+          dragInfo.startY,
+          e.clientX,
+          e.clientY
+        )
+        gameInfo.state = 2
+        gameInfo.flyInfo.startTime = Date.now()
+        console.log('flying ball')
+        drawFlyingBall()
+      }
+
+      svg.onmousemove = (e) => {
+        if (gameInfo.state == 1) {
+          const { dragInfo } = gameInfo
+          calDraggerEndpoint(
+            dragInfo.startX,
+            dragInfo.startY,
+            e.clientX,
+            e.clientY
+          )
+          updateSvg()
+        }
+      }
+
+      const updateSvg = () => {
+        const { ballInfo, dragInfo, flyInfo } = gameInfo
+        if (gameInfo.state == 1) {
+          // dragging
+          const { x: startX, y: startY } = getSvgPosFromPoint(
+            dragInfo.startX,
+            dragInfo.startY
+          )
+          const { x: endX, y: endY } = getSvgPosFromPoint(
+            dragInfo.endX,
+            dragInfo.endY
+          )
+          dragger.style.display = 'inline'
+          dragger.setAttribute('d', `M ${startX} ${startY} L ${endX} ${endY}`)
+        } else {
+          dragger.style.display = 'none'
+        }
+
+        ball.setAttribute('cx', ballInfo.currX)
+        ball.setAttribute('cy', ballInfo.currY)
+        ballShadow.setAttribute('x', ballInfo.currX - ballRadius)
+      }
+
+      const drawFlyingBall = () => {
+        if (gameInfo.state != 2) {
+          return
+        }
+        const { g, ballInfo, dragInfo, flyInfo } = gameInfo
+        calFlyingBallPos(
+          g,
+          ballInfo.startX,
+          ballInfo.startY,
+          dragInfo.endX - dragInfo.startX,
+          dragInfo.endY - dragInfo.startY,
+          flyInfo.startTime + ''
+        )
+        updateSvg()
+        if (ballInfo.currX > viewWidth || ballInfo.currY > viewHight) {
+          gameInfo.state = 3
+        } else {
+          requestAnimationFrame(drawFlyingBall)
+        }
+      }
+
+      const getSvgPosFromPoint = (x, y) => {
+        const svgRect = svg.getBoundingClientRect()
+        return {
+          x: x - svgRect.left,
+          y: y - svgRect.top,
+        }
+      }
+
+      let calFlyingBallPos = null
+      let calDraggerEndpoint = null
+      WebAssembly.instantiateStreaming(fetch('target/main.wasm'), {
+        date: {
+          now: () => Date.now() + '',
+        },
+        ball: {
+          setCurrPos: (x, y) => {
+            gameInfo.ballInfo.currX = x
+            gameInfo.ballInfo.currY = y
+          },
+        },
+        dragger: {
+          setEndpoint: (x, y) => {
+            gameInfo.dragInfo.endX = x
+            gameInfo.dragInfo.endY = y
+          },
+        },
+        spectest: {
+          print_i32: (x) => console.log(String(x)),
+          print_f64: (x) => console.log(String(x)),
+          print_char: (x) => console.log(String.fromCharCode(x)),
+        },
+      }).then((obj) => {
+        // obj.instance.exports._start()
+        calFlyingBallPos =
+          obj.instance.exports['throw-ball/main::calFlyingBallPos']
+        calDraggerEndpoint =
+          obj.instance.exports['throw-ball/main::calDraggerEndpoint']
+      })
+    </script>
+  </body>
+</html>
