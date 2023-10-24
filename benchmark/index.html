@@ -85,7 +85,39 @@
         return arr[arr.length - 1]
       }
 
+      const incrJS = (n) => {
+        let res = 0
+        for (let i = 1; i <= n; ++i) {
+          res += i
+        }
+        return res
+      }
+
+      const mulDivJS = (n) => {
+        let res = 1
+        for (let i = 2; i <= n; ++i) {
+          if (i % 2 === 0) {
+            res *= i
+          } else {
+            res /= i
+          }
+        }
+        return res
+      }
+
       const algos = [
+        {
+          name: 'incr',
+          js: incrJS,
+          wasm: null,
+          params: [99999999],
+        },
+        {
+          name: 'mulDiv',
+          js: mulDivJS,
+          wasm: null,
+          params: [99999999],
+        },
         {
           name: 'pi',
           js: piJS,
@@ -102,14 +134,8 @@
       WebAssembly.instantiateStreaming(fetch('target/main-opt.wasm'), {}).then(
         (obj) => {
           obj.instance.exports._start()
-          const funcNames = ['pi', 'prime']
-          for (const n of funcNames) {
-            algos.forEach((algo) => {
-              if (algo.name !== n) {
-                return
-              }
-              algo.wasm = obj.instance.exports[`benchmark/main::${algo.name}`]
-            })
+          for (const algo of algos) {
+            algo.wasm = obj.instance.exports[`benchmark/main::${algo.name}`]
           }
         }
       )
