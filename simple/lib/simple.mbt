@@ -1,4 +1,4 @@
-pub func hello() -> String {
+pub fn hello() -> String {
   "Hello, world!"
 }
 

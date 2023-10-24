@@ -9,7 +9,7 @@ if [ ! -d "$mod" ]; then
     echo module $mod not exists
     exit 0
 fi
-if [ ! -f $mod/moon.mod ]; then
+if [ ! -f $mod/moon.mod.json ]; then
     echo not a moon module
     exit 0
 fi
@@ -20,3 +20,5 @@ echo building...
 moon build
 echo wat2wasm...
 wat2wasm target/build/main/main.wat -o target/main.wasm
+echo wasm-opt...
+wasm-opt target/main.wasm -O3 -o target/main-opt.wasm

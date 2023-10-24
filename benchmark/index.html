@@ -1,0 +1,149 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Benchmark</title>
+  </head>
+  <body>
+    <div id="box">
+      <div id="view">
+        <table id="table">
+          <tr>
+            <th id="algo-name" colspan="3">algorithm</th>
+          </tr>
+          <tr>
+            <td></td>
+            <td>耗时</td>
+            <td>结果</td>
+          </tr>
+          <tr>
+            <td>JS</td>
+            <td id="js-time"></td>
+            <td id="js-result"></td>
+          </tr>
+          <tr>
+            <td>wasm</td>
+            <td id="wasm-time"></td>
+            <td id="wasm-result"></td>
+          </tr>
+        </table>
+      </div>
+      <div id="algo"></div>
+    </div>
+    <style>
+      #box {
+        margin: 0 auto;
+        padding-top: 20px;
+        width: 1000px;
+      }
+      #table {
+        width: 100%;
+        margin: 20px 0px;
+        padding: 0;
+        border-collapse: collapse;
+      }
+      #table td,
+      th {
+        padding: 5px;
+        border: 1px solid black;
+        border-collapse: collapse;
+      }
+      .algo-btn {
+        font-size: larger;
+        padding: 1px 10px;
+        margin: 0 10px;
+      }
+    </style>
+    <script>
+      const $ = (s) => document.querySelector(s)
+      const piJS = (n) => {
+        let f0 = -1
+        let f1 = 3
+        let pi = 4
+        while (n-- > 0) {
+          pi += (f0 * 4) / f1
+          f0 = -f0
+          f1 += 2
+        }
+        return pi
+      }
+
+      const primeJS = (n) => {
+        const arr = []
+        for (let i = 2; i <= n; ++i) {
+          let isPrime = true
+          for (let p of arr) {
+            if (i % p === 0) {
+              isPrime = false
+              break
+            }
+          }
+          if (isPrime) {
+            arr.push(i)
+          }
+        }
+        return arr[arr.length - 1]
+      }
+
+      const algos = [
+        {
+          name: 'pi',
+          js: piJS,
+          wasm: null,
+          params: [99999999],
+        },
+        {
+          name: 'prime',
+          js: primeJS,
+          wasm: null,
+          params: [99999],
+        },
+      ]
+      WebAssembly.instantiateStreaming(fetch('target/main-opt.wasm'), {}).then(
+        (obj) => {
+          obj.instance.exports._start()
+          const funcNames = ['pi', 'prime']
+          for (const n of funcNames) {
+            algos.forEach((algo) => {
+              if (algo.name !== n) {
+                return
+              }
+              algo.wasm = obj.instance.exports[`benchmark/main::${algo.name}`]
+            })
+          }
+        }
+      )
+
+      const runAlgo = (btn, algo) => {
+        btn.setAttribute('disabled', '')
+        $('#algo-name').innerText = algo.name + ' running...'
+        $('#js-time').innerText = ''
+        $('#js-result').innerText = ''
+        $('#wasm-time').innerText = ''
+        $('#wasm-result').innerText = ''
+        setTimeout(() => {
+          const t0 = Date.now()
+          const rJS = algo.js(...algo.params)
+          const t1 = Date.now()
+          const rWASM = algo.wasm(...algo.params)
+          const t2 = Date.now()
+          $('#js-time').innerText = `${t1 - t0} ms`
+          $('#js-result').innerText = rJS + ''
+          $('#wasm-time').innerText = `${t2 - t1} ms`
+          $('#wasm-result').innerText = rWASM + ''
+          $('#algo-name').innerText = algo.name
+          btn.removeAttribute('disabled')
+        }, 10)
+      }
+      const elemAlgo = $('#algo')
+      for (const i in algos) {
+        const algo = algos[i]
+        const btn = document.createElement('button')
+        elemAlgo.appendChild(btn)
+        btn.classList.add('algo-btn')
+        btn.innerText = algo.name
+        btn.onclick = () => runAlgo(btn, algo)
+      }
+    </script>
+  </body>
+</html>

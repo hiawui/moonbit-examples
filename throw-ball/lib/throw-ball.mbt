@@ -1,15 +1,14 @@
-func date_now() -> Int64 = "date" "now"
+fn date_now() -> Int64 = "date" "now"
 
-func setBallCurrPos(x : Float64, y : Float64) = "ball" "setCurrPos"
+fn setBallCurrPos(x : Double, y : Double) = "ball" "setCurrPos"
 
-func setDraggerEndpoint(x : Float64, y : Float64) = "dragger" "setEndpoint"
+fn setDraggerEndpoint(x : Double, y : Double) = "dragger" "setEndpoint"
 
-pub func calFlyingBallPos(g : Float64, ballStartX : Float64,
-        ballStartY : Float64, dragOffsetX : Float64, dragOffsetY : Float64,
-        flyStartTime : Int64) {
+pub fn calFlyingBallPos(g : Double, ballStartX : Double, ballStartY : Double,
+        dragOffsetX : Double, dragOffsetY : Double, flyStartTime : Int64) {
   let speedRatio = 0.01
   let now = date_now()
-  let t = (now - flyStartTime).to_float64()
+  let t = (now - flyStartTime).to_double()
   let speedX = dragOffsetX * speedRatio
   let speedY = dragOffsetY * speedRatio
   let cx = speedX * t + ballStartX
@@ -17,8 +16,8 @@ pub func calFlyingBallPos(g : Float64, ballStartX : Float64,
   setBallCurrPos(cx, cy)
 }
 
-pub func calDraggerEndpoint(dragStartX : Float64, dragStartY : Float64,
-        clientX : Float64, clientY : Float64) {
+pub fn calDraggerEndpoint(dragStartX : Double, dragStartY : Double,
+        clientX : Double, clientY : Double) {
   var endY = if clientY >= dragStartY {
     dragStartY
   } else {

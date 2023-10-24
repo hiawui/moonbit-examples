@@ -11,11 +11,13 @@
   - 构建脚本, 帮助生成各模块需要的 wasm 文件
 
   ```bash
-  # 为指定的模块在 target 目录生成 main.wasm
+  # 为指定的模块在 target 目录生成 main.wasm & main-opt.wasm
   ./build.sh [module]
   ```
 
 - simple/
   - 一些简单的实验
+- benchmark/
+  - wasm / js 性能对比 
 - throw-ball/
   - 一个抛球小游戏

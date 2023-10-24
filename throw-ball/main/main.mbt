@@ -1,6 +1,5 @@
-pub func calFlyingBallPos(g : Float64, ballStartX : Float64,
-        ballStartY : Float64, dragOffsetX : Float64, dragOffsetY : Float64,
-        flyStartTime : Int64) {
+pub fn calFlyingBallPos(g : Double, ballStartX : Double, ballStartY : Double,
+        dragOffsetX : Double, dragOffsetY : Double, flyStartTime : Int64) {
   @lib.calFlyingBallPos(
     g,
     ballStartX,
@@ -11,12 +10,12 @@ pub func calFlyingBallPos(g : Float64, ballStartX : Float64,
   )
 }
 
-pub func calDraggerEndpoint(dragStartX : Float64, dragStartY : Float64,
-        clientX : Float64, clientY : Float64) {
+pub fn calDraggerEndpoint(dragStartX : Double, dragStartY : Double,
+        clientX : Double, clientY : Double) {
   @lib.calDraggerEndpoint(dragStartX, dragStartY, clientX, clientY)
 }
 
-func init {
+fn init {
   println("throw ball wasm start")
 }
 
