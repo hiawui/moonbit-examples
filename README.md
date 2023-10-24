@@ -17,7 +17,9 @@
 
 - simple/
   - 一些简单的实验
+- darray/
+  - 动态增长的列表
 - benchmark/
-  - wasm / js 性能对比 
+  - wasm / js 性能对比
 - throw-ball/
   - 一个抛球小游戏
