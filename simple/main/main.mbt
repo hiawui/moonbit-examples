@@ -15,6 +15,8 @@ pub fn test_float(p : Double) -> Double {
 }
 
 fn init {
-  ()
+  let x = Bytes::make(5, 1024)
+  let v = x.length()
+  print_string("\(v)")
 }
 

@@ -185,7 +185,7 @@
 
       let calFlyingBallPos = null
       let calDraggerEndpoint = null
-      WebAssembly.instantiateStreaming(fetch('target/main.wasm'), {
+      WebAssembly.instantiateStreaming(fetch('target/main-opt.wasm'), {
         date: {
           now: () => Date.now() + '',
         },
@@ -207,7 +207,7 @@
           print_char: (x) => console.log(String.fromCharCode(x)),
         },
       }).then((obj) => {
-        // obj.instance.exports._start()
+        obj.instance.exports._start()
         calFlyingBallPos =
           obj.instance.exports['throw-ball/main::calFlyingBallPos']
         calDraggerEndpoint =
