@@ -11,7 +11,7 @@
   - 构建脚本, 帮助生成各模块需要的 wasm 文件
 
   ```bash
-  # 为指定的模块在 target 目录生成 main.wasm & main-opt.wasm
+  # 为指定的模块生成 main.wasm & main-opt.wasm
   ./build.sh [module]
   ```
 

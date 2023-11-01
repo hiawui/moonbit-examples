@@ -185,7 +185,7 @@
 
       let calFlyingBallPos = null
       let calDraggerEndpoint = null
-      WebAssembly.instantiateStreaming(fetch('target/main-opt.wasm'), {
+      WebAssembly.instantiateStreaming(fetch('target/build/main/main-opt.wasm'), {
         date: {
           now: () => Date.now() + '',
         },
