@@ -1,0 +1,48 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>DArray</title>
+  </head>
+  <body>
+    <div id="content">Empty</div>
+    <button id="btn-wasm">run wasm</button>
+    <button id="btn-js">run JS</button>
+    <script>
+      const $ = (s) => document.querySelector(s)
+      let fn_test = null
+      WebAssembly.instantiateStreaming(
+        fetch('target/build/main/main-opt.wasm'),
+        {
+          spectest: {
+            print_i32: (x) => console.log(String(x)),
+            print_f64: (x) => console.log(String(x)),
+            print_char: (x) => console.log(String.fromCharCode(x)),
+          },
+        }
+      ).then((obj) => {
+        obj.instance.exports._start()
+
+        fn_test = obj.instance.exports['darray/main::test']
+      })
+      const n = 49999
+      $('#btn-wasm').onclick = () => {
+        const t0 = Date.now()
+        const res = fn_test(n)
+        const t1 = Date.now()
+        $('#content').innerText = `res: ${res}, cost: ${t1 - t0} ms`
+      }
+
+      $('#btn-js').onclick = () => {
+        const t0 = Date.now()
+        const arr = []
+        for (let i = 0; i < n; ++i) {
+          arr.push(i)
+        }
+        let v = arr[n - 1]
+        const t1 = Date.now()
+        $('#content').innerText = `res: ${v}, cost: ${t1 - t0} ms`
+      }
+    </script>
+  </body>
+</html>

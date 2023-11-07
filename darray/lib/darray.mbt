@@ -1,4 +1,4 @@
-let blockSize = 32
+let defaultInitialSize = 50
 
 struct DArrayBlock[T] {
   value : Array[Option[T]]
@@ -8,11 +8,17 @@ struct DArrayBlock[T] {
 pub struct DArray[T] {
   priv head : DArrayBlock[T]
   priv mut _size : Int
+  priv mut _capacity : Int
 }
 
-pub fn DArray::new[T]() -> DArray[T] {
-  let head = { value: Array::make(blockSize, None), next: None }
-  let arr = { head, _size: 0 }
+pub fn DArray::new[T](initialSize : Int) -> DArray[T] {
+  let initSize = if initialSize < defaultInitialSize {
+    defaultInitialSize
+  } else {
+    initialSize
+  }
+  let head = { value: Array::make(initSize, None), next: None }
+  let arr = { head, _size: 0, _capacity: initSize }
   arr
 }
 
@@ -20,36 +26,49 @@ pub fn size[T](self : DArray[T]) -> Int {
   self._size
 }
 
-fn findBlockByIdx[T](self : DArray[T], idx : Int) -> DArrayBlock[T] {
-  var cnt = idx / blockSize
-  var last = self.head
-  while cnt > 0 {
-    cnt = cnt - 1
-    match last.next {
+pub fn capacity[T](self : DArray[T]) -> Int {
+  self._capacity
+}
+
+fn findBlockByIdx[T](self : DArray[T], idx : Int) -> (DArrayBlock[T], Int) {
+  var blockStartIdx = 0
+  var currBlock = self.head
+  while true {
+    if blockStartIdx + currBlock.value.length() > idx {
+      break
+    }
+    blockStartIdx = blockStartIdx + currBlock.value.length()
+    currBlock = match currBlock.next {
       None => {
-        let block = { value: Array::make(blockSize, None), next: None }
-        last.next = Some(block)
-        last = block
+        let block = {
+          value: Array::make(blockStartIdx.asr(1), None),
+          next: None,
+        }
+        currBlock.next = Some(block)
+        self._capacity = self._capacity + block.value.length()
+        block
       }
-      Some(block) => {
-        last = block
-      }
+      Some(block) => block
     }
   }
-  last
+  (currBlock, idx - blockStartIdx)
 }
 
 pub fn op_get[T](self : DArray[T], idx : Int) -> Option[T] {
   if idx > self._size - 1 {
     return None
   }
-  let last = self.findBlockByIdx(idx)
-  last.value[idx % blockSize]
+  let (block, idx0) = self.findBlockByIdx(idx)
+  block.value[idx0]
 }
 
 pub fn push[T](self : DArray[T], value : T) {
-  let last = self.findBlockByIdx(self._size)
-  last.value[self._size % blockSize] = Some(value)
+  let (block, idx0) = self.findBlockByIdx(self._size)
+  block.value[idx0] = Some(value)
   self._size = self._size + 1
+}
+
+fn init {
+  ()
 }
 

@@ -1,18 +1,17 @@
-fn init {
-  let arr : @lib.DArray[Int] = @lib.DArray::new()
-  println(arr.size())
-  arr.push(1)
-  arr.push(11)
-  arr.push(22)
+pub fn test(n : Int) -> Int {
+  let arr : @lib.DArray[Int] = @lib.DArray::new(n / 10)
   var i = 0
-  while i < arr.size() {
-    let v = match arr[i] {
-      None => -1
-      Some(e) => e
-    }
-    print("\(v), ")
+  while i < n {
+    arr.push(i)
     i = i + 1
   }
-  println("")
+  match arr[n - 1] {
+    None => -1
+    Some(e) => e
+  }
+}
+
+fn init {
+  ()
 }
 
