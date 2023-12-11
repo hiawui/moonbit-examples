@@ -27,4 +27,3 @@ pub fn prime(n : Int) -> Int {
   }
   last
 }
-

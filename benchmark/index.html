@@ -131,7 +131,7 @@
           params: [99999],
         },
       ]
-      WebAssembly.instantiateStreaming(fetch('target/build/main/main-opt.wasm'), {}).then(
+      WebAssembly.instantiateStreaming(fetch('target/main-opt.wasm'), {}).then(
         (obj) => {
           obj.instance.exports._start()
           for (const algo of algos) {

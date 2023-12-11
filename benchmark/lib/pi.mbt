@@ -11,4 +11,3 @@ pub fn pi(n : Int) -> Double {
   }
   pi
 }
-

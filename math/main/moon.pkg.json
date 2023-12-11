@@ -1,6 +1,6 @@
 {
   "is_main": true,
   "import": {
-    "simple/lib": ""
+    "math/lib": ""
   }
 }

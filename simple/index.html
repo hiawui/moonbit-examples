@@ -8,7 +8,7 @@
     <div id="content">Empty</div>
     <script>
       let memory = null
-      WebAssembly.instantiateStreaming(fetch('target/build/main/main.wasm'), {
+      WebAssembly.instantiateStreaming(fetch('target/main-opt.wasm'), {
         spectest: {
           print_i32: (x) => console.log(String(x)),
           print_f64: (x) => console.log(String(x)),

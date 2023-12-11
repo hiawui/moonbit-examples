@@ -1,0 +1,128 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Math</title>
+  </head>
+  <body>
+    <div id="box">
+      <div id="view">
+        <table id="table">
+          <tr>
+            <td>方法</td>
+            <td>WASM 耗时 (ms)</td>
+            <td>WASM 结果</td>
+            <td>JS 耗时 (ms)</td>
+            <td>JS 结果</td>
+          </tr>
+        </table>
+      </div>
+      <div id="algo">
+        <button id="btn-run">run</button>
+      </div>
+    </div>
+    <style>
+      #box {
+        margin: 0 auto;
+        padding-top: 20px;
+        width: 1000px;
+      }
+      #table {
+        width: 100%;
+        margin: 20px 0px;
+        padding: 0;
+        border-collapse: collapse;
+      }
+      #table td,
+      th {
+        padding: 5px;
+        border: 1px solid black;
+        border-collapse: collapse;
+      }
+      .algo-btn {
+        font-size: larger;
+        padding: 1px 10px;
+        margin: 0 10px;
+      }
+    </style>
+    <script>
+      const $ = (s) => document.querySelector(s)
+      const methods = [
+        {
+          name: 'round',
+          params: [49999999],
+          js: (n) => {
+            let r = 0
+            while (n-- > 0) {
+              r += Math.round(2251799813685248.5 + n)
+            }
+            return r
+          },
+        },
+        {
+          name: 'ceil',
+          params: [49999999],
+          js: (n) => {
+            let r = 0
+            while (n-- > 0) {
+              r += Math.ceil(2251799813685248.5 + n)
+            }
+            return r
+          },
+        },
+      ]
+      methods.forEach((method) => {
+        const tr = document.createElement('tr')
+        const td0 = document.createElement('td')
+        td0.innerText = method.name
+        tr.appendChild(td0)
+        const td1 = document.createElement('td')
+        method.tdWASMCost = td1
+        tr.appendChild(td1)
+        const td11 = document.createElement('td')
+        method.tdWASMRes = td11
+        tr.appendChild(td11)
+        const td2 = document.createElement('td')
+        method.tdJSCost = td2
+        tr.appendChild(td2)
+        const td21 = document.createElement('td')
+        method.tdJSRes = td21
+        tr.appendChild(td21)
+        $('#table').appendChild(tr)
+      })
+      WebAssembly.instantiateStreaming(
+        fetch('target/main-opt.wasm'),
+        {
+          spectest: {
+            print_i32: (x) => console.log(String(x)),
+            print_f64: (x) => console.log(String(x)),
+            print_char: (x) => console.log(String.fromCharCode(x)),
+          },
+        }
+      ).then((obj) => {
+        obj.instance.exports._start()
+        for (const m of methods) {
+          m.wasm = obj.instance.exports[`math/main::${m.name}`]
+        }
+      })
+      const btnRun = $('#btn-run')
+      btnRun.onclick = () => {
+        btnRun.setAttribute('disabled', '')
+        setTimeout(() => {
+          for (const m of methods) {
+            const t0 = Date.now()
+            const jsRes = m.js(...m.params)
+            const t1 = Date.now()
+            const wasmRes = m.wasm(...m.params)
+            const t2 = Date.now()
+            m.tdJSCost.innerText = `${t1 - t0}`
+            m.tdJSRes.innerText = jsRes
+            m.tdWASMCost.innerText = `${t2 - t1}`
+            m.tdWASMRes.innerText = wasmRes
+          }
+          btnRun.removeAttribute('disabled')
+        }, 10)
+      }
+    </script>
+  </body>
+</html>

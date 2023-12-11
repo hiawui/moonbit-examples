@@ -71,4 +71,3 @@ pub fn push[T](self : DArray[T], value : T) {
 fn init {
   ()
 }
-

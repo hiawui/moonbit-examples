@@ -12,7 +12,7 @@
       const $ = (s) => document.querySelector(s)
       let fn_test = null
       WebAssembly.instantiateStreaming(
-        fetch('target/build/main/main-opt.wasm'),
+        fetch('target/main-opt.wasm'),
         {
           spectest: {
             print_i32: (x) => console.log(String(x)),

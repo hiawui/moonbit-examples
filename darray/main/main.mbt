@@ -14,4 +14,3 @@ pub fn test(n : Int) -> Int {
 fn init {
   ()
 }
-

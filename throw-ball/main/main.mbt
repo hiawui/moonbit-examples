@@ -18,4 +18,3 @@ pub fn calDraggerEndpoint(dragStartX : Double, dragStartY : Double,
 fn init {
   println("throw ball wasm start")
 }
-

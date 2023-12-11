@@ -31,4 +31,3 @@ fn init {
   println(c)
   println(d)
 }
-

@@ -33,4 +33,3 @@ pub fn mulDiv(n : Int) -> Double {
 fn init {
   ()
 }
-
